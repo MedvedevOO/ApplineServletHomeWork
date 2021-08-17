@@ -1,10 +1,11 @@
 package ru.appline;
 
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import ru.appline.logic.Model;
 import ru.appline.logic.User;
-import com.google.gson.Gson;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -15,13 +16,13 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@WebServlet(urlPatterns = "/add")
-public class ServletAdd extends HttpServlet {
+@WebServlet(urlPatterns = "/update")
+public class ServletUpdate extends HttpServlet {
 
     private AtomicInteger counter = new AtomicInteger(5);
     Model model = Model.getInstance();
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    protected void doPut(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         request.setCharacterEncoding("UTF-8");
@@ -29,7 +30,6 @@ public class ServletAdd extends HttpServlet {
         PrintWriter pw = response.getWriter();
         StringBuffer jb = new StringBuffer();
         String line;
-
 
         try {
             BufferedReader reader = request.getReader();
@@ -41,13 +41,13 @@ public class ServletAdd extends HttpServlet {
         }
 
         JsonObject jsonObject = gson.fromJson(String.valueOf(jb), JsonObject.class);
-
+        int id = jsonObject.get("id").getAsInt();
         String name = jsonObject.get("name").getAsString();
         String surname = jsonObject.get("surname").getAsString();
         double salary = jsonObject.get("salary").getAsDouble();
 
         User user = new User(name,surname,salary);
-        model.add(user,counter.getAndIncrement());
+        model.add(user,id);
         pw.print(gson.toJson(model.getFromList()));
 
     }

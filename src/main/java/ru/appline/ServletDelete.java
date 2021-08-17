@@ -1,10 +1,12 @@
 package ru.appline;
 
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import org.json.JSONObject;
 import ru.appline.logic.Model;
 import ru.appline.logic.User;
-import com.google.gson.Gson;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -13,23 +15,22 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.concurrent.atomic.AtomicInteger;
 
-@WebServlet(urlPatterns = "/add")
-public class ServletAdd extends HttpServlet {
+@WebServlet(urlPatterns = "/delete")
+public class ServletDelete extends HttpServlet {
 
-    private AtomicInteger counter = new AtomicInteger(5);
+
     Model model = Model.getInstance();
-    Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
 
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        Model model = Model.getInstance();
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         request.setCharacterEncoding("UTF-8");
         response.setContentType("application/json;charset=utf-8");
         PrintWriter pw = response.getWriter();
         StringBuffer jb = new StringBuffer();
         String line;
-
 
         try {
             BufferedReader reader = request.getReader();
@@ -41,15 +42,16 @@ public class ServletAdd extends HttpServlet {
         }
 
         JsonObject jsonObject = gson.fromJson(String.valueOf(jb), JsonObject.class);
+        int id = jsonObject.get("id").getAsInt();
 
-        String name = jsonObject.get("name").getAsString();
-        String surname = jsonObject.get("surname").getAsString();
-        double salary = jsonObject.get("salary").getAsDouble();
+        if (id > 0) {
+                model.delete(id);
+                pw.print("User deleted");
+            }
+          else {
+            pw.print(new JSONObject("{\"Error\": \"IncorrectUserID\",\"message\": \"User ID must be > 0!\"}"));
 
-        User user = new User(name,surname,salary);
-        model.add(user,counter.getAndIncrement());
-        pw.print(gson.toJson(model.getFromList()));
-
+        }
+        pw.close();
     }
-
 }

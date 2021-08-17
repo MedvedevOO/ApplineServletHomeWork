@@ -29,4 +29,8 @@ public class Model implements Serializable {
         return model;
     }
 
+    public void delete(int id) {
+        model.remove(id);
+    }
+
 }
