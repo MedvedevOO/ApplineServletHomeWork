@@ -2,6 +2,7 @@ package ru.appline;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import org.json.JSONObject;
 import ru.appline.logic.Model;
 import ru.appline.logic.User;
@@ -29,23 +30,26 @@ public class ServletList extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         response.setContentType("application/json;charset=utf-8");
         PrintWriter pw = response.getWriter();
+        StringBuffer jb = new StringBuffer();
+        String line;
 
-        int id = Integer.parseInt(request.getParameter("id"));
+        try {
+            BufferedReader reader = request.getReader();
+            while ((line = reader.readLine()) != null) {
+                jb.append(line);
+            }
+        }catch (Exception e) {
+            System.out.println("Error");
+        }
+
+        JsonObject jsonObject = gson.fromJson(String.valueOf(jb), JsonObject.class);
+        int id = jsonObject.get("id").getAsInt();
+        //int id = Integer.parseInt(request.getParameter("id"));
 
         if (id == 0) {
             pw.print(gson.toJson(model.getFromList()));
 
-//            for (Map.Entry<Integer, User> entry : model.getFromList().entrySet()) {
-//                pw.print("<li>" + entry.getKey() + "</li>" +
-//                        "<ul>" +
-//                        "<li>Имя: " + entry.getValue().getName() + "</li>" +
-//                        "<li>Фамилия: " + entry.getValue().getSurname() + "</li>" +
-//                        "<li>Зарплата: " + entry.getValue().getSalary() + "</li>" +
-//                        "</ul>");
-//            }
-//            pw.print("</ul>" +
-//                    "<a href=\"index.jsp\">Домой</a>" +
-//                    "</html>");
+
         } else if (id > 0) {
             if(id > model.getFromList().size()) {
                 pw.print(new JSONObject("{\"Error\": \"UserNotFound\",\"message\": \"No such user\"}"));
@@ -57,20 +61,11 @@ public class ServletList extends HttpServlet {
                 User user = new User(name,surname,salary);
 
                 pw.print(gson.toJson(user));
-//                pw.print("<html>" +
-//                        "<h3>Запрошенный пользователь:</h3><br/>" +
-//                        "Имя: " + model.getFromList().get(id).getName() + "<br/>" +
-//                        "Фамилия: " + model.getFromList().get(id).getSurname() + "<br/>" +
-//                        "Зарплата: " + model.getFromList().get(id).getSalary() + "<br/>" +
-//                        "<a href=\"index.jsp\">Домой</a>" +
-//                        "</html>");
+
             }
         } else {
             pw.print(new JSONObject("{\"Error\": \"IncorrectUserID\",\"message\": \"User ID must be > 0!\"}"));
-//            pw.print("<html>" +
-//                    "<h3>ID должен быть > 0!</h3><br/>" +
-//                    "<a href=\"index.jsp\">Домой</a>" +
-//                    "</html>");
+
         }
         pw.close();
     }
