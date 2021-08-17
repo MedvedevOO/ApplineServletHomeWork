@@ -44,7 +44,6 @@ public class ServletList extends HttpServlet {
 
         JsonObject jsonObject = gson.fromJson(String.valueOf(jb), JsonObject.class);
         int id = jsonObject.get("id").getAsInt();
-        //int id = Integer.parseInt(request.getParameter("id"));
 
         if (id == 0) {
             pw.print(gson.toJson(model.getFromList()));
